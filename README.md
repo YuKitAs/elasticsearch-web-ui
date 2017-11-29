@@ -12,12 +12,12 @@ A material design WebUI for Elasticsearch 6.0.0 with basic features CRUD, sortin
 
 Creating a new document:
 
-![](screenshots/es-web-ui-add-form.png)
+<img src="screenshots/es-web-ui-add-form.png" width="600">
 
 Showing a JSON field:
 
-![](screenshots/es-web-ui-show-field.png)
+<img src="screenshots/es-web-ui-show-field.png" width="600">
 
 Editing a document name:
 
-![](screenshots/es-web-ui-edit.png)
+<img src="screenshots/es-web-ui-edit.png" width="600">
