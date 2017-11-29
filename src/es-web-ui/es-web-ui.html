@@ -1,9 +1,12 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid-sorter.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 
 <dom-module id="es-web-ui">
@@ -23,7 +26,6 @@
                 background-color: white;
                 color: #3c3c3c;
                 font-size: 16px;
-                font-weight: bold;
             }
 
             vaadin-grid {
@@ -41,16 +43,19 @@
                 font: inherit;
             }
 
+            #view {
+                color: #666666;
+            }
+
             #delete {
                 height: 40px;
                 width: 40px;
                 color: #808080;
                 font-size: 16px;
-                font-weight: bold;
             }
 
-            paper-dialog {
-                height: 300px;
+            #addForm {
+                height: auto;
                 width: 350px;
             }
 
@@ -65,6 +70,10 @@
                 color: #3c3c3c;
                 font-size: 16px;
                 font-weight: bold;
+            }
+
+            #fieldContent {
+                height: auto;
             }
         </style>
 
@@ -81,17 +90,25 @@
         <paper-button class="action-button" id="update" raised on-tap="_update">Update</paper-button>
 
         <vaadin-grid id="grid" items="[[data.hits.hits]]">
-            <vaadin-grid-column width="35%" frozen="true">
+            <vaadin-grid-column width="20%" frozen="true">
                 <template class="header">
                     <vaadin-grid-sorter path="_id" direction="asc">ID</vaadin-grid-sorter>
                 </template>
                 <template>[[item._id]]</template>
             </vaadin-grid-column>
 
-            <vaadin-grid-column width="50%" frozen="true">
+            <vaadin-grid-column width="35%" frozen="true">
                 <template class="header">Name</template>
                 <template>
                     <input value="{{item._source.name}}" readonly$="[[!isEditing]]">
+                </template>
+            </vaadin-grid-column>
+
+            <vaadin-grid-column width="30%" frozen="true">
+                <template class="header">Prop</template>
+                <template>
+                    <paper-icon-button id="view" on-tap="_openFieldContent" icon="description" title="View">
+                    </paper-icon-button>
                 </template>
             </vaadin-grid-column>
 
@@ -107,13 +124,21 @@
 
         <paper-dialog id="addForm" modal>
             <h3>Add a new document</h3>
-            <paper-input label="ID" value="{{id}}"></paper-input>
-            <paper-input label="Name" value="{{name}}"></paper-input>
+            <paper-input id="idInput" label="ID" value="{{id::change}}" required auto-validate pattern="[0-9]*"
+                         error-message="required (numbers only)"></paper-input>
+            <paper-input id="nameInput" label="Name" value="{{name::change}}" required auto-validate
+                         error-message="required"></paper-input>
+            <paper-textarea id="propInput" label="Prop (Multi-line supported)"
+                            value="{{prop::change}}"></paper-textarea>
 
             <div class="dialog-buttons">
                 <paper-button id="cancel" dialog-dismiss>Cancel</paper-button>
                 <paper-button id="ok" auto-focus dialog-confirm on-tap="_addItem">OK</paper-button>
             </div>
+        </paper-dialog>
+
+        <paper-dialog id="fieldContent" horizontal-align="left" vertical-align="top">
+            <pre id="content"></pre>
         </paper-dialog>
     </template>
 
@@ -143,14 +168,24 @@
             }
 
             _openAddForm() {
+                this.$.idInput.value = null;
+                this.$.nameInput.value = null;
+                this.$.propInput.value = null;
+
+
                 this.$.addForm.open();
             }
 
             _addItem() {
                 this.idToPut = this.id;
+                let prop = this.prop ? JSON.parse(this.prop) : {};
+
                 this.newDoc = {
-                    "name": this.name
+                    "name": this.name,
+                    "prop": prop
                 };
+
+                this.$.ajaxPut.generateRequest();
 
                 this.push('data.hits.hits', {
                     "_id": this.idToPut,
@@ -178,13 +213,23 @@
                     this.idToPut = items[i]._id;
 
                     this.newDoc = {
-                        "name": items[i]._source.name
+                        "name": items[i]._source.name,
+                        "prop": items[i]._source.prop
                     };
 
                     this.$.ajaxPut.generateRequest();
                 }
 
                 this.isEditing = false;
+            }
+
+            _openFieldContent(e) {
+                let prop = e.model.item._source.prop;
+                this.$.content.innerHTML = (prop && Object.keys(prop).length) ? JSON.stringify(e.model.item._source.prop, null,
+                    2) : "empty prop";
+
+                this.$.fieldContent.positionTarget = e.detail.sourceEvent.path[0];
+                this.$.fieldContent.open();
             }
         }
 
