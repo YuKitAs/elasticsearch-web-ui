@@ -18,6 +18,6 @@ Showing a JSON field:
 
 <img src="screenshots/es-web-ui-show-field.png" width="600">
 
-Editing a document name:
+Editing a document:
 
 <img src="screenshots/es-web-ui-edit.png" width="600">
