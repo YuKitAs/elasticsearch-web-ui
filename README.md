@@ -1,33 +1,23 @@
-# \<elasticsearch-web-ui\>
+# elasticsearch-web-ui
 
+A material design WebUI for Elasticsearch 6.0.0 with basic features CRUD, sorting and filtering.
 
+## Usage
 
-## Install the Polymer-CLI
+1. Install and run Elasticsearch.
 
-First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your application locally.
+2. Install Polymer-CLI and bower. Use `bower install` to install necessary components and then run `polymer serve` to serve this webapp locally.
 
-## Viewing Your Application
+## Screenshots
 
-```
-$ polymer serve
-```
+Creating a new document:
 
-## Building Your Application
+![](screenshots/es-web-ui-add-form.png)
 
-```
-$ polymer build
-```
+Showing a JSON field:
 
-This will create builds of your application in the `build/` directory, optimized to be served in production. You can then serve the built versions by giving `polymer serve` a folder to serve from:
+![](screenshots/es-web-ui-show-field.png)
 
-```
-$ polymer serve build/default
-```
+Editing a document name:
 
-## Running Tests
-
-```
-$ polymer test
-```
-
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
+![](screenshots/es-web-ui-edit.png)
