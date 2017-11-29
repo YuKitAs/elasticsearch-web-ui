@@ -3,6 +3,7 @@
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid-filter.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
@@ -33,6 +34,12 @@
                 width: 50vw;
                 font-family: Roboto, sans-serif;
                 font-size: 18px;
+            }
+
+            #filter-input {
+                margin-left: 50px;
+                width: 100px;
+                color: #808080;
             }
 
             input[readonly] {
@@ -107,7 +114,13 @@
             </vaadin-grid-column>
 
             <vaadin-grid-column width="35%" frozen="true">
-                <template class="header">Name</template>
+                <template class="header">
+                    <vaadin-grid-filter id="filter" path="_source.name" value="[[_filterName]]">
+                        <div slot="filter">Name</div>
+                        <input id="filter-input" slot="filter" placeholder="Filter" value="{{_filterName::input}}"
+                               focus-target>
+                    </vaadin-grid-filter>
+                </template>
                 <template>
                     <input value="{{item._source.name}}" readonly$="[[!isEditing]]">
                 </template>
