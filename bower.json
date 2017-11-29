@@ -1,0 +1,16 @@
+{
+  "name": "elasticsearch-web-ui",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0-rc.3",
+    "vaadin-grid": "^4.0.0",
+    "iron-ajax": "PolymerElements/iron-ajax#^2.0.6",
+    "paper-button": "Polymer/Elements/paper-button#^2.0.0",
+    "paper-input": "PolymerElements/paper-input#^2.0.3",
+    "paper-dialog": "PolymerElements/paper-dialog#^2.0.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "^6.0.0-prerelease.5",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.7"
+  }
+}

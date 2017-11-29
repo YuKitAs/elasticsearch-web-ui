@@ -1,0 +1,6 @@
+{
+  "name": "elasticsearch-web-ui",
+  "short_name": "elasticsearch-web-ui",
+  "start_url": "/",
+  "display": "standalone"
+}

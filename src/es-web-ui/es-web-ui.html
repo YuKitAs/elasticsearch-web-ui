@@ -1,0 +1,193 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+
+<dom-module id="es-web-ui">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            #url {
+                color: #3c3c3c;
+            }
+
+            .action-button {
+                margin: 20px 10px;
+                height: 40px;
+                background-color: white;
+                color: #3c3c3c;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            vaadin-grid {
+                height: auto;
+                width: 50vw;
+                font-family: Roboto, sans-serif;
+                font-size: 18px;
+            }
+
+            input[readonly] {
+                border: 2px solid transparent;
+            }
+
+            input {
+                font: inherit;
+            }
+
+            #delete {
+                height: 40px;
+                width: 40px;
+                color: #808080;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            paper-dialog {
+                height: 300px;
+                width: 350px;
+            }
+
+            paper-input {
+                width: 200px;
+            }
+
+            .dialog-buttons {
+                float: right;
+                display: flex;
+                justify-content: space-between;
+                color: #3c3c3c;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        </style>
+
+        <h2>Elasticsearch Web UI</h2>
+        <h3 id="url">http://localhost:9200/index</h3>
+
+        <iron-ajax id="ajaxGet" method="GET" url="http://localhost:9200/index/_search" handle-as="json"
+                   last-response="{{data}}"></iron-ajax>
+        <iron-ajax id="ajaxPut" method="PUT" url="http://localhost:9200/index/doc/[[idToPut]]" handle-as="json"
+                   content-type="application/json" body="[[newDoc]]" on-error="handleResponse"></iron-ajax>
+        <iron-ajax id="ajaxDelete" method="DELETE" url="http://localhost:9200/index/doc/[[idToDelete]]"></iron-ajax>
+
+        <paper-button class="action-button" id="edit" raised on-tap="_edit">Edit</paper-button>
+        <paper-button class="action-button" id="update" raised on-tap="_update">Update</paper-button>
+
+        <vaadin-grid id="grid" items="[[data.hits.hits]]">
+            <vaadin-grid-column width="35%" frozen="true">
+                <template class="header">
+                    <vaadin-grid-sorter path="_id" direction="asc">ID</vaadin-grid-sorter>
+                </template>
+                <template>[[item._id]]</template>
+            </vaadin-grid-column>
+
+            <vaadin-grid-column width="50%" frozen="true">
+                <template class="header">Name</template>
+                <template>
+                    <input value="{{item._source.name}}" readonly$="[[!isEditing]]">
+                </template>
+            </vaadin-grid-column>
+
+            <vaadin-grid-column width="15%" frozen="true">
+                <template class="header"></template>
+                <template>
+                    <paper-button id="delete" on-tap="_deleteItem">Delete</paper-button>
+                </template>
+            </vaadin-grid-column>
+        </vaadin-grid>
+
+        <paper-button class="action-button" raised on-tap="_openAddForm">Add</paper-button>
+
+        <paper-dialog id="addForm" modal>
+            <h3>Add a new document</h3>
+            <paper-input label="ID" value="{{id}}"></paper-input>
+            <paper-input label="Name" value="{{name}}"></paper-input>
+
+            <div class="dialog-buttons">
+                <paper-button id="cancel" dialog-dismiss>Cancel</paper-button>
+                <paper-button id="ok" auto-focus dialog-confirm on-tap="_addItem">OK</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        /** @polymerElement */
+        class EsWebUi extends Polymer.Element {
+            static get is() {
+                return 'es-web-ui';
+            }
+
+            ready() {
+                super.ready();
+
+                this.$.ajaxGet.generateRequest();
+            }
+
+            static get properties() {
+                return {
+                    idToAdd: Number,
+                    newDoc: Object,
+                    idToDelete: Number,
+                    isEditing: {
+                        type: Boolean,
+                        value: false
+                    }
+                };
+            }
+
+            _openAddForm() {
+                this.$.addForm.open();
+            }
+
+            _addItem() {
+                this.idToPut = this.id;
+                this.newDoc = {
+                    "name": this.name
+                };
+
+                this.push('data.hits.hits', {
+                    "_id": this.idToPut,
+                    "_source": this.newDoc
+                });
+            }
+
+            _edit() {
+                this.isEditing = true;
+            }
+
+            _deleteItem(e) {
+                this.idToDelete = e.model.item._id;
+
+                var index = this.data.hits.hits.indexOf(e.model.item);
+                this.$.grid.items.splice(index, 1);
+                this.$.grid.clearCache();
+
+                this.$.ajaxDelete.generateRequest();
+            }
+
+            _update() {
+                let items = this.data.hits.hits;
+                for (let i = 0; i < items.length; i++) {
+                    this.idToPut = items[i]._id;
+
+                    this.newDoc = {
+                        "name": items[i]._source.name
+                    };
+
+                    this.$.ajaxPut.generateRequest();
+                }
+
+                this.isEditing = false;
+            }
+        }
+
+        window.customElements.define(EsWebUi.is, EsWebUi);
+    </script>
+</dom-module>
