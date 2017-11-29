@@ -32,6 +32,7 @@
             vaadin-grid {
                 height: auto;
                 width: 50vw;
+                border: 1px solid #a6a6a6;
                 font-family: Roboto, sans-serif;
                 font-size: 18px;
             }
@@ -102,10 +103,11 @@
         <h3 id="url">http://localhost:9200/index</h3>
 
         <iron-ajax id="ajaxGet" method="GET" url="http://localhost:9200/index/_search" handle-as="json"
-                   last-response="{{data}}"></iron-ajax>
+                   last-response="{{data}}" on-error="handleResponse"></iron-ajax>
         <iron-ajax id="ajaxPut" method="PUT" url="http://localhost:9200/index/doc/[[idToPut]]" handle-as="json"
                    content-type="application/json" body="[[newDoc]]" on-error="handleResponse"></iron-ajax>
-        <iron-ajax id="ajaxDelete" method="DELETE" url="http://localhost:9200/index/doc/[[idToDelete]]"></iron-ajax>
+        <iron-ajax id="ajaxDelete" method="DELETE" url="http://localhost:9200/index/doc/[[idToDelete]]"
+                   on-error="handleResponse"></iron-ajax>
 
         <paper-button class="action-button" id="edit" raised on-tap="_edit">Edit</paper-button>
         <paper-button class="action-button" id="update" raised on-tap="_update">Update</paper-button>
@@ -120,7 +122,7 @@
 
             <vaadin-grid-column width="40%" frozen="true">
                 <template class="header">
-                    <vaadin-grid-filter id="filter" path="_source.name" value="[[_filterName]]">
+                    <vaadin-grid-filter path="_source.name" value="[[_filterName]]">
                         <div slot="filter">Name</div>
                         <input id="filter-input" slot="filter" placeholder="Filter" value="{{_filterName::input}}"
                                focus-target>
@@ -132,7 +134,7 @@
             </vaadin-grid-column>
 
             <vaadin-grid-column width="25%" frozen="true">
-                <template class="header">Prop</template>
+                <template class="header">Property</template>
                 <template>
                     <paper-icon-button id="view" on-tap="_openFieldContent" icon="description" title="View">
                     </paper-icon-button>
@@ -155,7 +157,7 @@
                          error-message="required (numbers only)"></paper-input>
             <paper-input id="nameInput" label="Name" value="{{name::change}}" required
                          error-message="required"></paper-input>
-            <paper-textarea id="propInput" label="Prop (Multi-line supported)"
+            <paper-textarea id="propInput" label="Property (Multi-line supported)"
                             value="{{prop::change}}"></paper-textarea>
 
             <div id="warning"></div>
@@ -260,7 +262,7 @@
                 this.idToDelete = this.activeItem._id;
                 this.$.ajaxDelete.generateRequest();
 
-                var index = this.data.hits.hits.indexOf(this.activeItem);
+                let index = this.data.hits.hits.indexOf(this.activeItem);
                 this.$.grid.items.splice(index, 1);
                 this.$.grid.clearCache();
             }
@@ -288,6 +290,10 @@
 
                 this.$.fieldContent.positionTarget = e.detail.sourceEvent.path[0];
                 this.$.fieldContent.open();
+            }
+
+            handleResponse() {
+                console.log(event.detail.request.xhr.response);
             }
         }
 
