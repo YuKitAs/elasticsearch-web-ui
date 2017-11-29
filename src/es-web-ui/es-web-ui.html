@@ -44,6 +44,7 @@
 
             input[readonly] {
                 border: 2px solid transparent;
+                background: transparent;
             }
 
             input {
@@ -91,6 +92,10 @@
                 width: auto;
                 padding: 20px;
             }
+
+            #warning {
+                color: #cc0000;
+            }
         </style>
 
         <h2>Elasticsearch Web UI</h2>
@@ -113,7 +118,7 @@
                 <template>[[item._id]]</template>
             </vaadin-grid-column>
 
-            <vaadin-grid-column width="35%" frozen="true">
+            <vaadin-grid-column width="40%" frozen="true">
                 <template class="header">
                     <vaadin-grid-filter id="filter" path="_source.name" value="[[_filterName]]">
                         <div slot="filter">Name</div>
@@ -126,7 +131,7 @@
                 </template>
             </vaadin-grid-column>
 
-            <vaadin-grid-column width="30%" frozen="true">
+            <vaadin-grid-column width="25%" frozen="true">
                 <template class="header">Prop</template>
                 <template>
                     <paper-icon-button id="view" on-tap="_openFieldContent" icon="description" title="View">
@@ -146,16 +151,18 @@
 
         <paper-dialog id="addForm" modal>
             <h3>Add a new document</h3>
-            <paper-input id="idInput" label="ID" value="{{id::change}}" required auto-validate pattern="[0-9]*"
+            <paper-input id="idInput" label="ID" value="{{id::change}}" required pattern="[0-9]*"
                          error-message="required (numbers only)"></paper-input>
-            <paper-input id="nameInput" label="Name" value="{{name::change}}" required auto-validate
+            <paper-input id="nameInput" label="Name" value="{{name::change}}" required
                          error-message="required"></paper-input>
             <paper-textarea id="propInput" label="Prop (Multi-line supported)"
                             value="{{prop::change}}"></paper-textarea>
 
+            <div id="warning"></div>
+
             <div class="dialog-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button auto-focus dialog-confirm on-tap="_addItem">OK</paper-button>
+                <paper-button auto-focus on-tap="_addItem">OK</paper-button>
             </div>
         </paper-dialog>
 
@@ -202,26 +209,41 @@
                 this.$.idInput.value = null;
                 this.$.nameInput.value = null;
                 this.$.propInput.value = null;
-
+                this.$.warning.innerHTML = "";
 
                 this.$.addForm.open();
             }
 
             _addItem() {
-                this.idToPut = this.id;
-                let prop = this.prop ? JSON.parse(this.prop) : {};
+                this.$.idInput.validate();
+                this.$.nameInput.validate();
 
-                this.newDoc = {
-                    "name": this.name,
-                    "prop": prop
-                };
+                let items = this.data.hits.hits;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i]._id === this.$.idInput.value) {
+                        this.$.warning.textContent = "Document with this id already exists!";
+                        return;
+                    }
+                }
 
-                this.$.ajaxPut.generateRequest();
+                if (!this.$.idInput.invalid && !this.$.nameInput.invalid) {
+                    this.idToPut = this.id;
+                    let prop = this.prop ? JSON.parse(this.prop) : {};
 
-                this.push('data.hits.hits', {
-                    "_id": this.idToPut,
-                    "_source": this.newDoc
-                });
+                    this.newDoc = {
+                        "name": this.name,
+                        "prop": prop
+                    };
+
+                    this.$.ajaxPut.generateRequest();
+
+                    this.push('data.hits.hits', {
+                        "_id": this.idToPut,
+                        "_source": this.newDoc
+                    });
+
+                    this.$.addForm.close();
+                }
             }
 
             _edit() {
