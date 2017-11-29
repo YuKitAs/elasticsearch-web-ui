@@ -54,6 +54,10 @@
                 font-size: 16px;
             }
 
+            #delete:hover {
+                color: #3c3c3c;
+            }
+
             #addForm {
                 height: auto;
                 width: 350px;
@@ -74,6 +78,11 @@
 
             #fieldContent {
                 height: auto;
+            }
+
+            #deleteConfirm {
+                width: auto;
+                padding: 20px;
             }
         </style>
 
@@ -115,7 +124,7 @@
             <vaadin-grid-column width="15%" frozen="true">
                 <template class="header"></template>
                 <template>
-                    <paper-button id="delete" on-tap="_deleteItem">Delete</paper-button>
+                    <paper-button id="delete" on-tap="_openDeleteConfirm">Delete</paper-button>
                 </template>
             </vaadin-grid-column>
         </vaadin-grid>
@@ -132,13 +141,21 @@
                             value="{{prop::change}}"></paper-textarea>
 
             <div class="dialog-buttons">
-                <paper-button id="cancel" dialog-dismiss>Cancel</paper-button>
-                <paper-button id="ok" auto-focus dialog-confirm on-tap="_addItem">OK</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button auto-focus dialog-confirm on-tap="_addItem">OK</paper-button>
             </div>
         </paper-dialog>
 
         <paper-dialog id="fieldContent" horizontal-align="left" vertical-align="top">
             <pre id="content"></pre>
+        </paper-dialog>
+
+        <paper-dialog id="deleteConfirm">
+            <h3>Do you want to permanently delete this document?</h3>
+            <div class="dialog-buttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button auto-focus dialog-confirm on-tap="_deleteItem">Yes</paper-button>
+            </div>
         </paper-dialog>
     </template>
 
@@ -163,7 +180,8 @@
                     isEditing: {
                         type: Boolean,
                         value: false
-                    }
+                    },
+                    activeItem: Object
                 };
             }
 
@@ -197,14 +215,19 @@
                 this.isEditing = true;
             }
 
-            _deleteItem(e) {
-                this.idToDelete = e.model.item._id;
+            _openDeleteConfirm(e) {
+                this.activeItem = e.model.item;
 
-                var index = this.data.hits.hits.indexOf(e.model.item);
+                this.$.deleteConfirm.open();
+            }
+
+            _deleteItem() {
+                this.idToDelete = this.activeItem._id;
+                this.$.ajaxDelete.generateRequest();
+
+                var index = this.data.hits.hits.indexOf(this.activeItem);
                 this.$.grid.items.splice(index, 1);
                 this.$.grid.clearCache();
-
-                this.$.ajaxDelete.generateRequest();
             }
 
             _update() {
