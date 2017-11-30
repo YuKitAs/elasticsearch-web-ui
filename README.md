@@ -4,9 +4,11 @@ A material design WebUI for Elasticsearch 6.0.0 with basic features CRUD, sortin
 
 ## Usage
 
-1. Install and run Elasticsearch.
+1. Install Elasticsearch.
 
-2. Install Polymer-CLI and bower. Use `bower install` to install necessary components and then run `polymer serve` to serve this webapp locally.
+2. Allow CORS (cross-origin resource sharing) and run Elasticsearch.
+
+3. Install Polymer-CLI and bower. Use `bower install` to install necessary components and then run `polymer serve` to serve this webapp locally.
 
 ## Screenshots
 
